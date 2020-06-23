@@ -48,7 +48,45 @@ class CustomConfig(ModelStark):
 
 
 site.register(Customer,CustomConfig)
-site.register(ConsultRecord)
-site.register(Student)
-site.register(CourseRecord)
-site.register(StudyRecord)
+
+class ConsultConfig(ModelStark):
+
+    list_display = ['customer','consultant','date','note']
+site.register(ConsultRecord,ConsultConfig)
+
+class StudentCopnfig(ModelStark):
+    list_display = ['customer','class_list']
+    list_display_links = ['customer']
+site.register(Student,StudentCopnfig)
+
+class CourseConfig(ModelStark):
+    def record(self, obj=None, header=False):
+        if header:
+            return "checked"
+        return mark_safe('<a href="/stark/crm_app/studyrecord/?course_record=%s">记录</a>'%obj.pk)
+    list_display = ['class_obj','day_num','teacher',record]
+
+
+    def patch_study(self,request,queryset):
+        print(queryset)
+        temp = []
+        for course_record in queryset:
+            student_list = Student.objects.filter(class_list__id=course_record.class_obj.pk)
+            for student in student_list:
+                obj = StudyRecord(student=student,course_record=course_record)
+                temp.append(obj)
+
+        StudyRecord.objects.bulk_create(temp)#批量插入
+
+
+
+    patch_study.short_description = "批量生成学习记录"
+    actions = [patch_study, ]
+
+site.register(CourseRecord,CourseConfig)
+
+class StudyConfig(ModelStark):
+
+    list_display = ['student','course_record','record','score']
+
+site.register(StudyRecord,StudyConfig)

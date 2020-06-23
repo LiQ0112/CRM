@@ -178,7 +178,7 @@ class Customer(models.Model):
     last_consult_date = models.DateField(verbose_name="最后跟进日期", )
 
     def __str__(self):
-        return "姓名:{0},QQ:{1}".format(self.name, self.qq, )
+        return self.name
 
 
 class ConsultRecord(models.Model):
